@@ -9,7 +9,9 @@ import java.util.*;
  */
 public class Test {
     public void sleep(Long millis) throws InterruptedException {
+        System.out.println("Sleeping ...");
         Thread.sleep(millis.longValue());
+        System.out.println("... Sleeping DONE");
     }
 
     public Date getCurrentDate() {
@@ -24,8 +26,20 @@ public class Test {
         return "Hello " + str + "!";
     }
 
+    public static String getStaticHello() {
+        return "Hello static world!";
+    }
+
     public void getVoid() {
         return;
+    }
+
+    public Object getNull() {
+        return null;
+    }
+
+    public String getAge(String name, int age) {
+        return name + ", " + age + " years old";
     }
 
     public String getException() throws Exception {

@@ -7,27 +7,24 @@ package exception;
  * @author Yevgeny Go
  *
  */
-public class SPRCServiceException extends SPRCException {
+public class SRPCClientException extends SRPCException {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 
-     */
-    public SPRCServiceException() {
+    public SRPCClientException() {
         super();
     }
 
     /**
      * @param message
      */
-    public SPRCServiceException(String message) {
+    public SRPCClientException(String message) {
         super(message);
     }
 
     /**
      * @param cause
      */
-    public SPRCServiceException(Throwable cause) {
+    public SRPCClientException(Throwable cause) {
         super(cause);
     }
 
@@ -35,9 +32,8 @@ public class SPRCServiceException extends SPRCException {
      * @param message
      * @param cause
      */
-    public SPRCServiceException(String message, Throwable cause) {
+    public SRPCClientException(String message, Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -46,7 +42,7 @@ public class SPRCServiceException extends SPRCException {
      * @param enableSuppression
      * @param writableStackTrace
      */
-    public SPRCServiceException(String message, Throwable cause,
+    public SRPCClientException(String message, Throwable cause,
             boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }

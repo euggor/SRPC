@@ -10,9 +10,6 @@ import contract.Response;
  *
  */
 public class ResponseImpl implements Response {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
     private int id;
     private Object result;

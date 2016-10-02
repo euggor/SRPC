@@ -5,6 +5,7 @@ import java.io.IOException;
 import client.Client;
 import contract.Caller;
 import contract.Service;
+import exception.SRPCMalformedServiceException;
 import helper.ServiceImpl;
 
 /**
@@ -42,14 +43,17 @@ public class Invoker {
         try {
             props = new PropHandler("../resources/services.properties"); // TODO
             System.out.println(props);
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-            System.err.println("ERROR");
+        } catch (IOException ioe) {
+            System.err.println(ioe + "\nABORTING");
             return;
         }
         Service services = new ServiceImpl(props.getProperties());
-        services.createObjects(props.getProperties());
+        try {
+            services.createObjects(props.getProperties());
+        } catch (SRPCMalformedServiceException mse) {
+            System.err.println(mse + "\nABORTING");
+            return;
+        }
         
         // Create a thread pool
         Executor executor = new Executor(capacity);
@@ -98,7 +102,12 @@ public class Invoker {
     private static void startClient(String serverName, int port, String service,
             String method, Object[] parameters) {
         Caller caller = new Client(serverName, port);
-        System.out.println("Service " + service + "." + method + " result: " +
-            caller.remoteCall(service, method, parameters));
+        try {
+            System.out.println("Service " + service + "." + method + " result: " +
+                caller.remoteCall(service, method, parameters));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }

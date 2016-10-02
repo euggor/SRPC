@@ -1,7 +1,7 @@
 Simple Remote Procedure Call Demo Application
 =============================================
 
-A demo application with implements a simple remote procedure call application.
+A demo application which implements a simple remote procedure call application.
 
 ## Configuration
 Map between service and implementing class is specified via property file
@@ -19,11 +19,19 @@ Run the following command in console:
     java Invoker client <server_host> <server_tcp_port_number> <service> <method> <method_parameters>
 
 ## Notes
+    * Services and methods are case sensitive.
+    * remoteCall() method throws SRPCClientException, if call failed.
     
-* TODO
-
+## TODO
     * Own product building system like Ant
-    * Self-checker tests
+    * Logger usage instead of println
+    * Ability to specify services.properties file located from anywhere.
+    * Fully automated self-checker tests under a harness like JUnit which able to run
+      the server part
+    * Self-checker tests verifying the server part: wrong services, wrong
+      client calls, etc.
+    * Multi-threaded version of the client which able to make batch calls
+      to services at one invocation.
     
 ## Author
-[Yevgeny](yevgor@gmail.com)
+[Yevgeny Go](yevgor@gmail.com)

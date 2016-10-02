@@ -11,8 +11,10 @@ import java.util.concurrent.CountDownLatch;
 
 import contract.Request;
 import contract.Service;
-import exception.SPRCServiceException;
+import contract.VoidResponse;
+import exception.SRPCServiceException;
 import helper.ResponseImpl; // TODO
+import helper.VoidResponseImpl;
 
 /**
  * @author Yevgeny Go
@@ -66,7 +68,11 @@ public class ClientHandler implements Runnable {
                 } catch (InterruptedException exc) { // TODO
                     System.out.println(exc); 
                 }
-                out.writeObject(new ResponseImpl(id, requestHandler.getResult()));
+                if (requestHandler.getResult() == null) { // a void method
+                    out.writeObject(new VoidResponseImpl(id));
+                } else {
+                    out.writeObject(new ResponseImpl(id, requestHandler.getResult()));
+                }
                 
                 if (!request.hasNext()) {
                     running = false;
@@ -80,7 +86,7 @@ public class ClientHandler implements Runnable {
         } catch (ClassNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (SPRCServiceException e) {
+        } catch (SRPCServiceException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

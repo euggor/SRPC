@@ -11,7 +11,8 @@ import java.util.Map.Entry;
 
 import contract.Service;
 import server.ReflectHandler;
-import exception.SPRCServiceMerhodThrowsException;
+import exception.SRPCMalformedServiceException;
+import exception.SRPCServiceMerhodThrowsException;
 
 /**
  * @author Yevgeny Go
@@ -29,7 +30,7 @@ public class ServiceImpl implements Service {
      * @see contract.Service#createServiceObjects(java.util.Properties)
      */
     @Override
-    public void createObjects(Properties properties) {
+    public void createObjects(Properties properties) throws SRPCMalformedServiceException {
         services = new HashMap<String, Object>();
         
         for (Entry<Object, Object> entry : properties.entrySet()) {
@@ -62,13 +63,14 @@ public class ServiceImpl implements Service {
     }
 
     /* (non-Javadoc)
-     * @see contract.Service#isMethodVoid(java.util.Properties)
+     * @see contract.Service#isMethodVoid(String, String, Object[])
      */
     @Override
     public boolean isMethodVoid(String serviceName, String methodName,
             Object[] parameters) {
-        // TODO Auto-generated method stub
-        return false;
+        Method m = ReflectHandler.getMethod(properties.getProperty(serviceName),
+                methodName, parameters);
+        return (m.getReturnType().toString().equalsIgnoreCase("void") ? true : false);
     }
 
     /* (non-Javadoc)
@@ -85,7 +87,7 @@ public class ServiceImpl implements Service {
 //            result = method.invoke(getObject(serviceName), (Object) argTypes);
             result = method.invoke(getObject(serviceName), parameters);
         } catch (InvocationTargetException e) {
-            result = new SPRCServiceMerhodThrowsException("Method " + serviceName +
+            result = new SRPCServiceMerhodThrowsException("Method " + serviceName +
                 "." + methodName + " throws the exception: " + e.getTargetException());
         } catch (IllegalAccessException | IllegalArgumentException e) {
             // TODO Auto-generated catch block

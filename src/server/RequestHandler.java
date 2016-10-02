@@ -7,8 +7,8 @@ import java.util.concurrent.CountDownLatch;
 
 import contract.Request;
 import contract.Service;
-import exception.SPRCServiceException;
-import exception.SPRCServiceMethodNotFoundException;
+import exception.SRPCServiceException;
+import exception.SRPCServiceMethodNotFoundException;
 import exception.SRPCServiceNotFoundException;
 
 /**
@@ -42,12 +42,18 @@ public class RequestHandler implements Runnable {
         
         if (service.isServiceExist(request.getServiceName())) {
             if (service.isMethodExist(request.getServiceName(),
-                request.getMethodName(), request.getParameters())) {
+                    request.getMethodName(), request.getParameters())) {
                 result = service.invokeMethod(request.getServiceName(),
                     request.getMethodName(), request.getParameters());
+                
+                if (service.isMethodVoid(request.getServiceName(),
+                        request.getMethodName(), request.getParameters())) {
+                    System.out.println("VOID");
+                    result = null; // explicitly set a null result for a void method
+                }
             } else { // Method not found
                 System.out.println("RequestHandler: not existing service method for " + request);
-                result = new SPRCServiceMethodNotFoundException("Method " + request.getServiceName() +
+                result = new SRPCServiceMethodNotFoundException("Method " + request.getServiceName() +
                     "." + request.getMethodName() + " not found");
             }
         } else { // Service not found
@@ -67,9 +73,9 @@ public class RequestHandler implements Runnable {
         latch.countDown(); // notify invoker that the service is done
     }
     
-    public Object getResult() throws SPRCServiceException {
+    public Object getResult() throws SRPCServiceException {
         if (!ready) {
-            throw new SPRCServiceException("Result not ready for the service " +
+            throw new SRPCServiceException("Result not ready for the service " +
                 request.getServiceName() + "." + request.getMethodName() +
                 "(" + request.getParameters() + ")");
         }

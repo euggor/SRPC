@@ -8,6 +8,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+import exception.SRPCMalformedServiceException;
+
 /**
  * @author Yevgeny Go
  *
@@ -19,8 +21,9 @@ public class ReflectHandler {
      * 
      * @param className
      * @return
+     * @throws SRPCMalformedServiceException 
      */
-    public static Object createObject(String className) {
+    public static Object createObject(String className) throws SRPCMalformedServiceException {
         System.out.println("Creating object from class name " + className);
         
         Object obj = null;
@@ -34,8 +37,8 @@ public class ReflectHandler {
                 | IllegalArgumentException | InvocationTargetException
                 | ClassNotFoundException | NoSuchMethodException
                 | SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new SRPCMalformedServiceException("Unable to create new instance from the object: "
+                + e);
         }
         
         return obj;
@@ -74,6 +77,7 @@ public class ReflectHandler {
                      }
                  } else {
                      if (params.length == 0) { // method with no parameters
+                         printMethod(m);
                          System.out.println("Method " + className + "." +
                                  methodName + "() found!"); // TODO
                          method = m;

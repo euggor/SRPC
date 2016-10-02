@@ -7,27 +7,24 @@ package exception;
  * @author Yevgeny Go
  *
  */
-public class SRPCServiceNotFoundException extends SRPCServiceException {
+public class SRPCServiceMerhodThrowsException extends SRPCServiceException {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 
-     */
-    public SRPCServiceNotFoundException() {
+    public SRPCServiceMerhodThrowsException() {
         super();
     }
 
     /**
      * @param message
      */
-    public SRPCServiceNotFoundException(String message) {
+    public SRPCServiceMerhodThrowsException(String message) {
         super(message);
     }
 
     /**
      * @param cause
      */
-    public SRPCServiceNotFoundException(Throwable cause) {
+    public SRPCServiceMerhodThrowsException(Throwable cause) {
         super(cause);
     }
 
@@ -35,7 +32,7 @@ public class SRPCServiceNotFoundException extends SRPCServiceException {
      * @param message
      * @param cause
      */
-    public SRPCServiceNotFoundException(String message, Throwable cause) {
+    public SRPCServiceMerhodThrowsException(String message, Throwable cause) {
         super(message, cause);
     }
 
@@ -45,7 +42,7 @@ public class SRPCServiceNotFoundException extends SRPCServiceException {
      * @param enableSuppression
      * @param writableStackTrace
      */
-    public SRPCServiceNotFoundException(String message, Throwable cause,
+    public SRPCServiceMerhodThrowsException(String message, Throwable cause,
             boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }

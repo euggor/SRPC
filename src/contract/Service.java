@@ -5,6 +5,8 @@ package contract;
 
 import java.util.Properties;
 
+import exception.SRPCMalformedServiceException;
+
 /**
  * @author Yevgeny Go
  *
@@ -13,8 +15,9 @@ public interface Service { // TODO
     /**
      * Create service objects 
      * @param props
+     * @throws SRPCMalformedServiceException 
      */
-    public void createObjects(Properties props);
+    public void createObjects(Properties props) throws SRPCMalformedServiceException;
 
     /**
      * Check that service exists
