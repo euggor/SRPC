@@ -17,8 +17,7 @@ public class PropHandler {
 
     /**
      * 
-     * @param propFile
-     * throws FileNotFoundException 
+     * @param propFileName
      * @throws IOException 
      */
     public PropHandler(String propFileName) throws IOException {
@@ -28,7 +27,7 @@ public class PropHandler {
 
     /**
      * 
-     * @return Properties prop
+     * @return Properties properties
      */
     public Properties getProperties() {
         return properties;
@@ -43,6 +42,7 @@ public class PropHandler {
         return properties.getProperty(key);
     }
     
+    @Override
     public String toString() {
         StringBuffer propStr = new StringBuffer("Properties: ");
         for (Entry<Object, Object> entry : properties.entrySet()) {

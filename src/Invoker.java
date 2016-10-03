@@ -2,17 +2,23 @@ import server.*;
 
 import java.io.IOException;
 
+//import org.apache.log4j.Logger;
+
 import client.Client;
 import contract.Caller;
 import contract.Service;
-import exception.SRPCMalformedServiceException;
 import helper.ServiceImpl;
+import exception.SRPCMalformedServiceException;
 
 /**
+ * Client/server invocation wrapper
+ * 
  * @author Yevgeny Go
  *
  */
 public class Invoker {
+//    private static final Logger log = Logger.getLogger(Invoker.class);
+    
     static volatile boolean keepRunning = true; 
     
     /**
@@ -24,9 +30,12 @@ public class Invoker {
         String type = args[0]; // start client or server
                 
         if (type.equalsIgnoreCase("server")) {
-            startServerInfra(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+            if (args.length > 2) {
+                startServerInfra(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+            } else {
+                startServerInfra(Integer.parseInt(args[1]), -1);
+            }
         } else {
-            System.out.println("Args " + args.length); // TODO
             startClient(args[1], Integer.parseInt(args[2]), args[3], args[4],
                 args.length > 5 ? new Object[] {args[5]} : null); // TODO 
         }
@@ -35,14 +44,14 @@ public class Invoker {
     /**
      * 
      * @param port
-     * @throws FileNotFoundException 
+     * @param capacity
      */
     private static void startServerInfra(int port, int capacity) {
         // Create service objects
         PropHandler props = null;
         try {
             props = new PropHandler("../resources/services.properties"); // TODO
-            System.out.println(props);
+//            log.debug(props);
         } catch (IOException ioe) {
             System.err.println(ioe + "\nABORTING");
             return;
@@ -56,7 +65,8 @@ public class Invoker {
         }
         
         // Create a thread pool
-        Executor executor = new Executor(capacity);
+        Executor executor = capacity == -1 ?
+            new Executor() : new Executor(capacity) ;
 
         // Start a thread listener
         Listener listener = new Listener(port, executor, services);

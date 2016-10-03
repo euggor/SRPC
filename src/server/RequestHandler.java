@@ -9,6 +9,7 @@ import contract.Request;
 import contract.Service;
 import exception.SRPCServiceException;
 import exception.SRPCServiceMethodNotFoundException;
+import exception.SRPCServiceMethodWrongParameterException;
 import exception.SRPCServiceNotFoundException;
 
 /**
@@ -24,8 +25,9 @@ public class RequestHandler implements Runnable {
     
     /**
      * 
-     * @param latch 
-     * @param requst
+     * @param request
+     * @param service
+     * @param latch
      */
     public RequestHandler(Request request, Service service, CountDownLatch latch) {
         this.request = request;
@@ -33,28 +35,32 @@ public class RequestHandler implements Runnable {
         this.latch = latch;
     }
 
-    /**
-     * 
-     */
+    @Override
     public void run() {
-        // TODO Auto-generated method stub
         System.out.println("RequestHandler: " + request + " service: " + service);
         
         if (service.isServiceExist(request.getServiceName())) {
             if (service.isMethodExist(request.getServiceName(),
-                    request.getMethodName(), request.getParameters())) {
+                    request.getMethodName(), request.getParameters())) { // the method found
                 result = service.invokeMethod(request.getServiceName(),
                     request.getMethodName(), request.getParameters());
                 
                 if (service.isMethodVoid(request.getServiceName(),
                         request.getMethodName(), request.getParameters())) {
-                    System.out.println("VOID");
+                    System.out.println("VOID"); // TODO
                     result = null; // explicitly set a null result for a void method
                 }
-            } else { // Method not found
-                System.out.println("RequestHandler: not existing service method for " + request);
-                result = new SRPCServiceMethodNotFoundException("Method " + request.getServiceName() +
-                    "." + request.getMethodName() + " not found");
+            } else { // the method not found, check other possible signatures
+                if (service.isMethodExist(request.getServiceName(),
+                        request.getMethodName())) { // other signature found
+                    System.out.println("RequestHandler: wrong parameters of the service method for " + request);
+                    result = new SRPCServiceMethodWrongParameterException("Attempt to invoke method " + request.getServiceName() +
+                        "." + request.getMethodName() + " with wrong parameters");
+                } else { // other signature not found
+                    System.out.println("RequestHandler: not existing service method for " + request);
+                    result = new SRPCServiceMethodNotFoundException("Method " + request.getServiceName() +
+                        "." + request.getMethodName() + " not found");
+                }
             }
         } else { // Service not found
             System.out.println("RequestHandler: not existing service for " + request);
@@ -73,6 +79,11 @@ public class RequestHandler implements Runnable {
         latch.countDown(); // notify invoker that the service is done
     }
     
+    /**
+     * 
+     * @return Object result
+     * @throws SRPCServiceException
+     */
     public Object getResult() throws SRPCServiceException {
         if (!ready) {
             throw new SRPCServiceException("Result not ready for the service " +

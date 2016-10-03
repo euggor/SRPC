@@ -11,11 +11,14 @@ import contract.Response;
  */
 public class ResponseImpl implements Response {
     private static final long serialVersionUID = 1L;
+    
     private int id;
     private Object result;
     
     /**
      * 
+     * @param id
+     * @param result
      */
     public ResponseImpl(int id, Object result) {
         this.id = id;
@@ -38,6 +41,7 @@ public class ResponseImpl implements Response {
         return result;
     }
 
+    @Override
     public String toString() {
         return "Session id: " + getId() +
             " result: " + result;

@@ -9,9 +9,9 @@ import contract.Caller;
 import contract.Request;
 import contract.Response;
 import contract.VoidResponse;
+import helper.RequestImpl;
 import exception.SRPCClientException;
 import exception.SRPCServiceException;
-import helper.RequestImpl;
 
 /**
  * @author Yevgeny Go
@@ -50,23 +50,25 @@ public class Client implements Caller {
      * @return remote call result object
      * @throws SRPCClientException 
      */
-    public Object remoteCall(String serviceName, String methodName, Object[] params) throws SRPCClientException {
+    @Override
+    public Object remoteCall(String serviceName, String methodName, Object[] params)
+            throws SRPCClientException {
         Response res = null;
         
         try {
             Socket client = new Socket(serverName, port);
-            System.out.println("Client: connected to "  + serverName + ", " + port + 
-                ", " + client.getRemoteSocketAddress());
+            System.out.println("-> Client " + sessionId + ": connected to "  +
+                serverName + ", " + port + ", " + client.getRemoteSocketAddress());
                         
             ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(client.getInputStream());
 
             Request req = new RequestImpl(sessionId, serviceName, methodName, params, false);
-            System.out.println("Client: requested : " + req);
+            System.out.println("Client " + sessionId + ": requested : " + req);
             out.writeObject(req);
             
             res = (Response) in.readObject();
-            System.out.println("Client: server responded: " + res);
+            System.out.println("Client " + sessionId + ": server responded: " + res);
             
             client.close();
 
@@ -81,7 +83,7 @@ public class Client implements Caller {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        
+        System.out.println("<- Client " + sessionId + " exiting ");
         return res.getServiceResult();
     }
 }

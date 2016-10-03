@@ -12,16 +12,29 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public class Executor {
+    private static final int capacity = 10;
     private ExecutorService eService;
     
     /**
-     * 
+     * Default executor pool capacity
      */
-    public Executor(int poolCapacity) {
-        this.eService = Executors.newFixedThreadPool(poolCapacity);
-        System.out.println("Creating pool of " + poolCapacity + " threads"); // TODO 
+    public Executor() {
+        this(capacity);
     }
 
+    /**
+     * 
+     * @param poolCapacity
+     */
+    public Executor(int poolCapacity) {
+        System.out.println("Creating pool of " + poolCapacity + " threads"); 
+        this.eService = Executors.newFixedThreadPool(poolCapacity);
+    }
+
+    /**
+     * 
+     * @param service
+     */
     public void executeService(RequestHandler service) {
         eService.execute(service); 
     }

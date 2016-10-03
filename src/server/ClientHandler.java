@@ -7,14 +7,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.CountDownLatch;
 
 import contract.Request;
 import contract.Service;
-import contract.VoidResponse;
-import exception.SRPCServiceException;
-import helper.ResponseImpl; // TODO
+import helper.ResponseImpl;
 import helper.VoidResponseImpl;
+import exception.SRPCServiceException;
 
 /**
  * @author Yevgeny Go
@@ -41,14 +41,13 @@ public class ClientHandler implements Runnable {
     /* (non-Javadoc)
      * @see java.lang.Runnable#run()
      */
+    @Override
     public void run() {
-        System.out.println("-> Accepted Client: " +
-            clientSocket.getInetAddress().getHostName());
+        System.out.println("-> Server: accepted the client: " +
+            clientSocket.getInetAddress().getHostName() + " [" +
+            clientSocket.getRemoteSocketAddress() + "]");
         
         try {
-            System.out.println("Server: connected to "
-                + clientSocket.getRemoteSocketAddress());
-                
             ObjectInputStream in =
                 new ObjectInputStream(clientSocket.getInputStream());
             ObjectOutputStream out =
@@ -56,7 +55,7 @@ public class ClientHandler implements Runnable {
             while (running) {
                 Request request = (Request) in.readObject();
                 int id = request.getId();
-                System.out.println("Client requested: " + request);
+                System.out.println("Server: the client requested: " + request);
                 
                 CountDownLatch latch = new CountDownLatch(1); 
                     
@@ -65,25 +64,36 @@ public class ClientHandler implements Runnable {
                 executor.executeService(requestHandler);
                 try { 
                     latch.await(); 
-                } catch (InterruptedException exc) { // TODO
-                    System.out.println(exc); 
-                }
-                if (requestHandler.getResult() == null) { // a void method
-                    out.writeObject(new VoidResponseImpl(id));
-                } else {
-                    out.writeObject(new ResponseImpl(id, requestHandler.getResult()));
+
+                    // Get the service result
+                    try {
+                        if (requestHandler.getResult() == null) { // a void method
+                            out.writeObject(new VoidResponseImpl(id));
+                        } else {
+                            out.writeObject(new ResponseImpl(id, requestHandler.getResult()));
+                        }
+
+                        if (!request.hasNext()) {
+                            running = false;
+                        }
+                    } catch (SocketException se) {
+                        running = false;
+                        System.out.println("Connection aborted: " + se);
+                    }
+                } catch (InterruptedException exc) {
+                    running = false;
+                    System.out.println("Unable to get service result: " + exc);
                 }
                 
-                if (!request.hasNext()) {
-                    running = false;
+                if (!running) {
                     System.out.println("<- Stopping thread for the client " + id);
-                    clientSocket.close();
                 }
             }
+
+            clientSocket.close();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+            System.out.println("Unable to establish connection : " + e);
+        } catch( ClassNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (SRPCServiceException e) {

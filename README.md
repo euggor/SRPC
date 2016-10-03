@@ -22,16 +22,23 @@ Run the following command in console:
     * Services and methods are case sensitive.
     * remoteCall() method throws SRPCClientException, if call failed.
     
-## TODO
-    * Own product building system like Ant
-    * Logger usage instead of println
-    * Ability to specify services.properties file located from anywhere.
-    * Fully automated self-checker tests under a harness like JUnit which able to run
-      the server part
-    * Self-checker tests verifying the server part: wrong services, wrong
-      client calls, etc.
-    * Multi-threaded version of the client which able to make batch calls
-      to services at one invocation.
+### TODO
+    * Product
+        - An own product building system like Ant.
+        - Logger usage instead of println.
+        - A clear exception flow in server code.
+        - More precise handling of method signatures.
+        - Named and position-free input parameters for client and
+          server.
+        - Ability to specify services.properties file located from
+          anywhere.
+        - Multi-threaded version of the client which able to make batch
+          calls to services at one invocation.
+    * Tests
+        - Fully automated self-checker tests under a harness like JUnit
+          which able to run the server part.
+        - Self-checking tests verifying the server part: wrong services,
+          wrong client calls, etc.
     
 ## Author
 [Yevgeny Go](yevgor@gmail.com)

@@ -11,6 +11,7 @@ import contract.VoidResponse;
  */
 public class VoidResponseImpl implements VoidResponse {
     private static final long serialVersionUID = 1L;
+    
     private int id;
 
     /**

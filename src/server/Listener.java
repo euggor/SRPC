@@ -20,16 +20,18 @@ public class Listener implements Runnable {
     private ServerSocket socket;
     private Executor executor;
     private Service services;
-    private volatile int num = 0; // number of clients
+    private volatile int num = 0; // number of served clients
     
     /**
-     * @param services 
      * 
+     * @param port
+     * @param executor
+     * @param services
      */
     public Listener(int port, Executor executor, Service services) {
         try {
             socket = new ServerSocket(port);
-            socket.setSoTimeout(100000); // TODO ??? milliseconds
+//            socket.setSoTimeout(100000); // milliseconds
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -70,6 +72,10 @@ public class Listener implements Runnable {
         this.keepRunning = false;
     }
     
+    /**
+     * 
+     * @return int number of served clients
+     */
     public int getClientNumbers() {
         return num;
     }

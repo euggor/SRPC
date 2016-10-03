@@ -10,10 +10,8 @@ import contract.Request;
  *
  */
 public class RequestImpl implements Request {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
+
     private int id;
     private String serviceName;
     private String methodName;
@@ -65,21 +63,18 @@ public class RequestImpl implements Request {
      */
     @Override
     public Object[] getParameters() {
-        // TODO Auto-generated method stub
         return parameters;
     }
+
+    @Override
+    public boolean hasNext() {
+        return hasNext;
+    }
     
+    @Override
     public String toString() {
         return "Session id: " + getId() +
             " service: " + getServiceName() + "." + getMethodName() +
             "; " + (hasNext() ? "bunch of requests" : "a single request");
-    }
-
-    /**
-     * 
-     */
-    @Override
-    public boolean hasNext() {
-        return hasNext;
     }
 }

@@ -4,24 +4,25 @@ package exception;
  * @author Yevgeny Go
  *
  */
-public class SRPCClientException extends SRPCException {
+public class SRPCServiceMethodWrongParameterException
+        extends SRPCServiceException {
     private static final long serialVersionUID = 1L;
 
-    public SRPCClientException() {
+    public SRPCServiceMethodWrongParameterException() {
         super();
     }
 
     /**
      * @param message
      */
-    public SRPCClientException(String message) {
+    public SRPCServiceMethodWrongParameterException(String message) {
         super(message);
     }
 
     /**
      * @param cause
      */
-    public SRPCClientException(Throwable cause) {
+    public SRPCServiceMethodWrongParameterException(Throwable cause) {
         super(cause);
     }
 
@@ -29,7 +30,8 @@ public class SRPCClientException extends SRPCException {
      * @param message
      * @param cause
      */
-    public SRPCClientException(String message, Throwable cause) {
+    public SRPCServiceMethodWrongParameterException(String message,
+            Throwable cause) {
         super(message, cause);
     }
 
@@ -39,8 +41,9 @@ public class SRPCClientException extends SRPCException {
      * @param enableSuppression
      * @param writableStackTrace
      */
-    public SRPCClientException(String message, Throwable cause,
-            boolean enableSuppression, boolean writableStackTrace) {
+    public SRPCServiceMethodWrongParameterException(String message,
+            Throwable cause, boolean enableSuppression,
+            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

@@ -7,7 +7,7 @@ import client.Client;
 import exception.SRPCClientException;
 
 /**
- * A simple multi-threaded test implementing a customer checking scenario
+ * A simple multi-threaded test implementing a customer's checking scenario
  * 
  * @author Yevgeny Go
  */
@@ -16,10 +16,6 @@ public class TClient {
      * @param args
      */
     public static void main(String[] args) {
-/*        TClient client = new TClient(args[0], args[1]);
-        for(int i=0; i<10; i++) {
-            new Thread(new Caller(client)).start();
-        }*/
         Client client = new Client(args[0], args[1]);
         for (int i=0; i<10; i++) {
             new Thread(new Caller(client)).start();
@@ -34,6 +30,7 @@ public class TClient {
             this.c = c;
         }
     
+        @Override
         public void run() {
             while(true) {
                 try {

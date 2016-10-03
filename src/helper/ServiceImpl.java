@@ -13,6 +13,7 @@ import contract.Service;
 import server.ReflectHandler;
 import exception.SRPCMalformedServiceException;
 import exception.SRPCServiceMerhodThrowsException;
+import exception.SRPCServiceMethodWrongParameterException;
 
 /**
  * @author Yevgeny Go
@@ -22,6 +23,10 @@ public class ServiceImpl implements Service {
     private Properties properties;
     private HashMap<String, Object> services;
     
+    /**
+     * 
+     * @param properties
+     */
     public ServiceImpl(Properties properties) {
         this.properties = properties;
     }
@@ -63,6 +68,16 @@ public class ServiceImpl implements Service {
     }
 
     /* (non-Javadoc)
+     * @see contract.Service#isMethodExist(String, String)
+     */
+    @Override
+    public boolean isMethodExist(String serviceName, String methodName) {
+        Method m = ReflectHandler.getMethod(properties.getProperty(serviceName),
+            methodName);
+        return (m == null ? false : true);
+    }
+
+    /* (non-Javadoc)
      * @see contract.Service#isMethodVoid(String, String, Object[])
      */
     @Override
@@ -89,14 +104,18 @@ public class ServiceImpl implements Service {
         } catch (InvocationTargetException e) {
             result = new SRPCServiceMerhodThrowsException("Method " + serviceName +
                 "." + methodName + " throws the exception: " + e.getTargetException());
-        } catch (IllegalAccessException | IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
+            result = new SRPCServiceMethodWrongParameterException("Method " + serviceName +
+                "." + methodName + " throws the exception: " + e);
+        } catch (IllegalAccessException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } // TODO
+        }
         
         return result;
     }
     
+    @Override
     public String toString() {
         StringBuffer propStr = new StringBuffer("Service object map: ");
         for (Entry<String, Object> entry : services.entrySet()) {
@@ -107,6 +126,6 @@ public class ServiceImpl implements Service {
 
     private Object getObject(String serviceName) {
         System.out.println("Requested service object:" + services.get(serviceName));
-        return services.get(serviceName); // TODO: no such service/method handling
+        return services.get(serviceName);
     }
 }

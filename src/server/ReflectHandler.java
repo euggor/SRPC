@@ -15,12 +15,13 @@ import exception.SRPCMalformedServiceException;
  *
  */
 public class ReflectHandler {
-    private static final String format = "%24s: %s%n";
+//    private static final String format = "%24s: %s%n";
     
     /**
+     * Create an object from the class name
      * 
      * @param className
-     * @return
+     * @return Object created object
      * @throws SRPCMalformedServiceException 
      */
     public static Object createObject(String className) throws SRPCMalformedServiceException {
@@ -45,13 +46,39 @@ public class ReflectHandler {
     }
 
     /**
+     * Get method
      * 
      * @param className
      * @param methodName
-     * @param methodParameters 
-     * @return method
+     * @param methodParameters
+     * @return Method
      */
-    public static Method getMethod(String className, String methodName, Object[] methodParameters) {
+    public static Method getMethod(String className, String methodName,
+            Object[] methodParameters) {
+        return getMethodInternal(className, methodName, methodParameters, false);
+    }
+
+    /**
+     * Get method ignoring its parameters
+     * 
+     * @param className
+     * @param methodName
+     * @return Method
+     */
+    public static Method getMethod(String className, String methodName) {
+        return getMethodInternal(className, methodName, null, true);
+    }
+
+    /**
+     * 
+     * @param className
+     * @param methodName
+     * @param methodParameters
+     * @param ignoreParameters
+     * @return
+     */
+    private static Method getMethodInternal(String className, String methodName,
+            Object[] methodParameters, boolean ignoreParameters) {
         System.out.println("Getting method from " + className + "." + methodName);
 
         Class<?> clazz = null;
@@ -66,10 +93,15 @@ public class ReflectHandler {
         Method method = null;
         for (Method m : allMethods) {
              if (m.getName().equals(methodName)) {
+                 if (ignoreParameters) {
+                     method = m;
+                     break;
+                 }
+                 
                  Parameter[] params = m.getParameters();
                  if (methodParameters != null && methodParameters.length > 0) { // parameterized method
                      if (params.length == methodParameters.length) { // TODO
-                         printMethod(m);
+//                         printMethod(m);
                          System.out.println("Method " + className + "." +
                              methodName + "(" + params + ") found!"); // TODO
                          method = m;
@@ -77,7 +109,7 @@ public class ReflectHandler {
                      }
                  } else {
                      if (params.length == 0) { // method with no parameters
-                         printMethod(m);
+//                         printMethod(m);
                          System.out.println("Method " + className + "." +
                                  methodName + "() found!"); // TODO
                          method = m;
@@ -93,8 +125,8 @@ public class ReflectHandler {
         }
         return method;
     }
-    
-    private static void printMethod(Method method) { // TODO
+
+/*    private static void printMethod(Method method) { // TODO
         System.out.format("Name %s%n", method.getName());
         System.out.format("Generic %s%n", method.toGenericString());
         System.out.format(format, "Return type", method.getReturnType());
@@ -109,5 +141,5 @@ public class ReflectHandler {
             System.out.format(format, "Is name present?", p.isNamePresent());
             System.out.format(format, "Is synthetic?", p.isSynthetic());
         }
-    }
+    }*/
 }
