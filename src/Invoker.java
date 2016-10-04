@@ -82,7 +82,7 @@ public class Invoker {
                 new Listener(executor, services) :
                 new Listener(port, executor, services);
         } catch (IOException ioe) {
-            logger.error("Unable to start socker listener: " + ioe.getMessage());
+            logger.error("Unable to start a socket listener: " + ioe.getMessage());
             return;
         }
         
