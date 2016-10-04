@@ -2,6 +2,9 @@ package tests.service;
 
 import java.util.*;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * A test service class covering several test cases.
  * 
@@ -9,10 +12,11 @@ import java.util.*;
  *
  */
 public class Test {
+    private static Logger logger = LogManager.getLogger(Test.class);
+
     public void sleep(Long millis) throws InterruptedException {
-        System.out.println("Sleeping ...");
+        logger.debug("Sleeping for " + millis + " millis");
         Thread.sleep(millis.longValue());
-        System.out.println("... Sleeping DONE");
     }
 
     public Date getCurrentDate() {
@@ -47,6 +51,7 @@ public class Test {
         throw new Exception("I'm throwing exception");
     }
 
+    @Override
     public String toString() {
         return "Service 'Test'";
     }

@@ -27,7 +27,7 @@ public class PropHandler {
 
     /**
      * 
-     * @return Properties properties
+     * @return properties
      */
     public Properties getProperties() {
         return properties;
@@ -44,9 +44,9 @@ public class PropHandler {
     
     @Override
     public String toString() {
-        StringBuffer propStr = new StringBuffer("Properties: ");
+        StringBuffer propStr = new StringBuffer("Properties:\n\t");
         for (Entry<Object, Object> entry : properties.entrySet()) {
-            propStr.append(entry.getKey() + " => " + entry.getValue() + "\n");
+            propStr.append(entry.getKey() + " => " + entry.getValue() + "; ");
         }
         return propStr.toString();
     }

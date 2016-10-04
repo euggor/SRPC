@@ -11,6 +11,7 @@ public class Echoer {
         return str;
     }
 
+    @Override
     public String toString() {
         return "Service 'Echoer'";
     }

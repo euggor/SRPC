@@ -7,9 +7,6 @@ package exception;
 public class SRPCServiceNotFoundException extends SRPCServiceException {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 
-     */
     public SRPCServiceNotFoundException() {
         super();
     }

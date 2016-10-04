@@ -5,6 +5,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import contract.Caller;
 import contract.Request;
 import contract.Response;
@@ -18,6 +21,7 @@ import exception.SRPCServiceException;
  *
  */
 public class Client implements Caller {
+    private static Logger logger = LogManager.getLogger(Client.class);
     private String serverName;
     private int port;
     private int sessionId = (int) (Math.random()*10000) + 1;
@@ -57,18 +61,18 @@ public class Client implements Caller {
         
         try {
             Socket client = new Socket(serverName, port);
-            System.out.println("-> Client " + sessionId + ": connected to "  +
+            logger.info("-> " + sessionId + ": connected to "  +
                 serverName + ", " + port + ", " + client.getRemoteSocketAddress());
                         
             ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(client.getInputStream());
 
             Request req = new RequestImpl(sessionId, serviceName, methodName, params, false);
-            System.out.println("Client " + sessionId + ": requested : " + req);
+            logger.debug(sessionId + ": requested: " + req);
             out.writeObject(req);
             
             res = (Response) in.readObject();
-            System.out.println("Client " + sessionId + ": server responded: " + res);
+            logger.debug(sessionId + ": server responded: " + res);
             
             client.close();
 
@@ -76,14 +80,33 @@ public class Client implements Caller {
                 throw new SRPCClientException("Remote call failed: " + res.getServiceResult());
             }
             if (res instanceof VoidResponse) {
-                System.out.println("Void call (no value returned)");
+                logger.info("Void call (no value returned)");
             }
         } catch(IOException e) {
-            e.printStackTrace();
+            logger.error("Catch: ", e);
+            throw new SRPCClientException("Remote call failed: " + e.getMessage());
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.error("Catch: ", e);
+            throw new SRPCClientException("Remote call failed: " + e.getMessage());
         }
-        System.out.println("<- Client " + sessionId + " exiting ");
-        return res.getServiceResult();
+        
+        Object result = res.getServiceResult();
+        logger.info("<- " + sessionId + " exiting with result " + result);
+        return result;
+    }
+
+    /**
+     * @param sessionId
+     * @param serviceName
+     * @param methodName
+     * @param params
+     * @return remote call result object
+     * @throws SRPCClientException 
+     */
+    @Override
+    public Object remoteCall(int sessionId, String serviceName, String methodName, Object[] params)
+            throws SRPCClientException {
+        this.sessionId = sessionId;
+        return remoteCall(serviceName, methodName, params);
     }
 }
