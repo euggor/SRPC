@@ -7,11 +7,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * @author Yevgeny Go
  *
  */
 public class Executor {
+    private static Logger logger = LogManager.getLogger(Executor.class);
     private static final int capacity = 10;
     private ExecutorService eService;
     
@@ -27,8 +31,8 @@ public class Executor {
      * @param poolCapacity
      */
     public Executor(int poolCapacity) {
-        System.out.println("Creating pool of " + poolCapacity + " threads"); 
         this.eService = Executors.newFixedThreadPool(poolCapacity);
+        logger.info("Executing pool of " + poolCapacity + " threads created"); 
     }
 
     /**
@@ -47,15 +51,16 @@ public class Executor {
                 eService.shutdownNow(); // Cancel currently executing tasks
             // Wait a while for tasks to respond to being cancelled
             if (!eService.awaitTermination(60, TimeUnit.SECONDS))
-                System.err.println("WARNING: Executor pool did not terminate");
+                logger.warn("Executing pool did not terminated");
             }
         } catch (InterruptedException ie) {
             // (Re-)Cancel if current thread also interrupted
             eService.shutdownNow();
+            
             // Preserve interrupt status
             Thread.currentThread().interrupt();
         }
         
-        System.out.println("... Executor pool terminated"); // TODO
+        logger.info("Executing pool shutdown completed");
     }
 }

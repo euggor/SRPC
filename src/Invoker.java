@@ -2,7 +2,8 @@ import server.*;
 
 import java.io.IOException;
 
-//import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import client.Client;
 import contract.Caller;
@@ -17,8 +18,8 @@ import exception.SRPCMalformedServiceException;
  *
  */
 public class Invoker {
-//    private static final Logger log = Logger.getLogger(Invoker.class);
-    
+    private static Logger logger = LogManager.getLogger(Invoker.class);
+    private static final String propsFile = "../resources/services.properties"; // TODO: hard-coded value
     static volatile boolean keepRunning = true; 
     
     /**
@@ -26,52 +27,66 @@ public class Invoker {
      * @throws InterruptedException 
      */
     public static void main(String[] args) throws InterruptedException {
-        // Parse input args TODO
-        String type = args[0]; // start client or server
-                
+        // TODO: graceful parsing of input arguments
+        String type = args[0]; // start client or server       
         if (type.equalsIgnoreCase("server")) {
-            if (args.length > 2) {
-                startServerInfra(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
-            } else {
-                startServerInfra(Integer.parseInt(args[1]), -1);
+            switch (args.length) {
+            case 3:
+                startServerInfra(propsFile, Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+                break;
+            case 2:
+                startServerInfra(propsFile, Integer.parseInt(args[1]), -1);
+                break;
+            default:
+                startServerInfra(propsFile, -1, -1);
+                break;
             }
         } else {
             startClient(args[1], Integer.parseInt(args[2]), args[3], args[4],
-                args.length > 5 ? new Object[] {args[5]} : null); // TODO 
+                args.length > 5 ? new Object[] {args[5]} : null); 
         }
     }
     
     /**
      * 
+     * @param propertyFile
      * @param port
      * @param capacity
      */
-    private static void startServerInfra(int port, int capacity) {
+    private static void startServerInfra(String propertyFile, int port, int capacity) {
         // Create service objects
         PropHandler props = null;
         try {
-            props = new PropHandler("../resources/services.properties"); // TODO
-//            log.debug(props);
+            props = new PropHandler(propertyFile);
+            logger.debug(props);
         } catch (IOException ioe) {
-            System.err.println(ioe + "\nABORTING");
+            logger.warn("Wrong server configuration: " + ioe.getMessage());
             return;
         }
         Service services = new ServiceImpl(props.getProperties());
         try {
             services.createObjects(props.getProperties());
         } catch (SRPCMalformedServiceException mse) {
-            System.err.println(mse + "\nABORTING");
+            logger.warn("Wrong server configuration: " + mse.getMessage());
             return;
         }
         
-        // Create a thread pool
+        // Create an executing pool
         Executor executor = capacity == -1 ?
             new Executor() : new Executor(capacity) ;
 
-        // Start a thread listener
-        Listener listener = new Listener(port, executor, services);
+        // Start a socket listener
+        Listener listener;
+        try {
+            listener = port == -1 ?
+                new Listener(executor, services) :
+                new Listener(port, executor, services);
+        } catch (IOException ioe) {
+            logger.error("Unable to start socker listener: " + ioe.getMessage());
+            return;
+        }
         
-        // Add shutdown hook
+        // Add a shutdown hook
         Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(
             new Thread() {
@@ -81,22 +96,20 @@ public class Invoker {
                     keepRunning = false;
                     try {
                         mainThread.join();
-                        System.out.println("... Invoker done. Number of served clients: " +
+                        logger.info("Main server thread done. Number of served clients: " +
                             listener.getClientNumbers());
                     } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        logger.warn("Shutdown hook catch:", e);
                     }
                 }
             });
         
-        // TODO Never-ending loop
+        // Never-ending loop for main thread
         while(keepRunning) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.warn("Main server thread catch:", e);
             }
         }
     }
@@ -113,11 +126,18 @@ public class Invoker {
             String method, Object[] parameters) {
         Caller caller = new Client(serverName, port);
         try {
-            System.out.println("Service " + service + "." + method + " result: " +
+            logger.info("Service " + service + "." + method + " result: " +
                 caller.remoteCall(service, method, parameters));
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Client catch:", e);
         }
     }
+    
+/*    private static void printCP() {
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+        URL[] urls = ((URLClassLoader) cl).getURLs();
+        for (URL url: urls) {
+            logger.debug(url.getFile());
+        }
+    }*/
 }

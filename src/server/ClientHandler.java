@@ -10,6 +10,9 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import contract.Request;
 import contract.Service;
 import helper.ResponseImpl;
@@ -21,6 +24,7 @@ import exception.SRPCServiceException;
  *
  */
 public class ClientHandler implements Runnable {
+    private static Logger logger = LogManager.getLogger(ClientHandler.class);
     private Socket clientSocket;
     private Executor executor;
     private Service service;
@@ -43,7 +47,7 @@ public class ClientHandler implements Runnable {
      */
     @Override
     public void run() {
-        System.out.println("-> Server: accepted the client: " +
+        logger.info("-> Accepted the client: " +
             clientSocket.getInetAddress().getHostName() + " [" +
             clientSocket.getRemoteSocketAddress() + "]");
         
@@ -55,7 +59,7 @@ public class ClientHandler implements Runnable {
             while (running) {
                 Request request = (Request) in.readObject();
                 int id = request.getId();
-                System.out.println("Server: the client requested: " + request);
+                logger.debug("The client " + id + " requested: " + request);
                 
                 CountDownLatch latch = new CountDownLatch(1); 
                     
@@ -78,27 +82,25 @@ public class ClientHandler implements Runnable {
                         }
                     } catch (SocketException se) {
                         running = false;
-                        System.out.println("Connection aborted: " + se);
+                        logger.warn("Connection with the client " + id +
+                            " aborted: " + se.getMessage());
                     }
                 } catch (InterruptedException exc) {
                     running = false;
-                    System.out.println("Unable to get service result: " + exc);
+                    logger.warn("Unable to get service result for the client " +
+                        id + ": " + exc.getMessage());
                 }
                 
                 if (!running) {
-                    System.out.println("<- Stopping thread for the client " + id);
+                    logger.info("<- Closing thread for the client " + id);
                 }
             }
 
             clientSocket.close();
         } catch (IOException e) {
-            System.out.println("Unable to establish connection : " + e);
-        } catch( ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SRPCServiceException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("Unable to establish connection: " + e.getMessage());
+        } catch( ClassNotFoundException | SRPCServiceException e) {
+            logger.error("Catch: ", e);
         }
     }
 }

@@ -25,41 +25,41 @@ public interface Service {
     public boolean isServiceExist(String serviceName);
     
     /**
-     * Check that the method exists
+     * Check that method exists
      * 
      * @param serviceName
      * @param methodName
      * @param parameters
-     * @return boolean true if the method exists
+     * @return true if the method exists
      */
     public boolean isMethodExist(String serviceName, String methodName, Object[] parameters);
 
     /**
-     * Check that the method exists ignoring its parameters
+     * Check that method exists ignoring its parameters
      * 
      * @param serviceName
      * @param methodName
-     * @return boolean true if the method exists
+     * @return true if the method exists
      */
     public boolean isMethodExist(String serviceName, String methodName);
 
     /**
-     * Check that the method is void
+     * Check that method is void
      * 
      * @param serviceName
      * @param methodName
      * @param parameters
-     * @return
+     * @return true if the method is void
      */
     public boolean isMethodVoid(String serviceName, String methodName, Object[] parameters);
 
     /**
-     * Invoke the method
+     * Invoke method
      * 
      * @param serviceName
      * @param methodName
      * @param parameters
-     * @return Object result
+     * @return result
      */
     public Object invokeMethod(String serviceName, String methodName, Object[] parameters);
 }

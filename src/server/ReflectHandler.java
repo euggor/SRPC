@@ -8,6 +8,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import exception.SRPCMalformedServiceException;
 
 /**
@@ -15,7 +18,7 @@ import exception.SRPCMalformedServiceException;
  *
  */
 public class ReflectHandler {
-//    private static final String format = "%24s: %s%n";
+    private static Logger logger = LogManager.getLogger(ReflectHandler.class);
     
     /**
      * Create an object from the class name
@@ -25,21 +28,19 @@ public class ReflectHandler {
      * @throws SRPCMalformedServiceException 
      */
     public static Object createObject(String className) throws SRPCMalformedServiceException {
-        System.out.println("Creating object from class name " + className);
-        
         Object obj = null;
         try {
             Class<?> clazz = Class.forName(className);
-            Constructor<?> ctor = clazz.getConstructor(); // TODO: No parameters in constructor
-            System.out.println("Constructor " + ctor); // TODO
-            obj = ctor.newInstance(); // TODO constructor parameters
-            System.out.println("Created service object: " + obj);
+            Constructor<?> ctor = clazz.getConstructor(); // TODO: Parameters in constructor
+            logger.debug("Constructor " + ctor);
+            obj = ctor.newInstance();
+            logger.info("Created service object: " + obj);
         } catch (InstantiationException | IllegalAccessException
                 | IllegalArgumentException | InvocationTargetException
                 | ClassNotFoundException | NoSuchMethodException
                 | SecurityException e) {
-            throw new SRPCMalformedServiceException("Unable to create new instance from the object: "
-                + e);
+            throw new SRPCMalformedServiceException("Unable to create new instance from the object " +
+                className + ": " + e);
         }
         
         return obj;
@@ -79,14 +80,14 @@ public class ReflectHandler {
      */
     private static Method getMethodInternal(String className, String methodName,
             Object[] methodParameters, boolean ignoreParameters) {
-        System.out.println("Getting method from " + className + "." + methodName);
+        logger.debug("Getting method from " + className + "." + methodName);
 
         Class<?> clazz = null;
         try {
             clazz = Class.forName(className);
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.warn("Catch: ", e);
+            return null;
         }
         
         Method[] allMethods = clazz.getDeclaredMethods();
@@ -100,18 +101,16 @@ public class ReflectHandler {
                  
                  Parameter[] params = m.getParameters();
                  if (methodParameters != null && methodParameters.length > 0) { // parameterized method
-                     if (params.length == methodParameters.length) { // TODO
-//                         printMethod(m);
-                         System.out.println("Method " + className + "." +
-                             methodName + "(" + params + ") found!"); // TODO
+                     if (params.length == methodParameters.length) { // TODO more precise work with method signatures
+                         logger.debug("Method " + className + "." +
+                             methodName + "(" + params + ") found:\n" + methodDetails(m));
                          method = m;
                          break;
                      }
                  } else {
                      if (params.length == 0) { // method with no parameters
-//                         printMethod(m);
-                         System.out.println("Method " + className + "." +
-                                 methodName + "() found!"); // TODO
+                         logger.debug("Method " + className + "." +
+                             methodName + "() found:\n\n" + methodDetails(m));
                          method = m;
                          break;
                      }
@@ -120,26 +119,31 @@ public class ReflectHandler {
         }
         
         if (method == null) {
-            System.out.println("Method " + className + "." +
-                 methodName + " not found!");
+            logger.debug("Method " + className + "." +
+                methodName + " not found");
         }
         return method;
     }
 
-/*    private static void printMethod(Method method) { // TODO
-        System.out.format("Name %s%n", method.getName());
-        System.out.format("Generic %s%n", method.toGenericString());
-        System.out.format(format, "Return type", method.getReturnType());
-        System.out.format(format, "Generic return type", method.getGenericReturnType());
+    private static String methodDetails(Method method) {
+        StringBuffer detailsStr = new StringBuffer(">>>>>>>>>>\nMethod name: " +
+            method.getName() + "\n\tGeneric name: " + method.toGenericString() +
+            "\n\tReturn type: " + method.getReturnType() +
+            "\n\tGeneric return type: " + method.getGenericReturnType());
                 
         Parameter[] allParams = method.getParameters();
+        int i = 1;
         for (Parameter p : allParams) {
-            System.out.format(format, "Parameter class", p.getType());
-            System.out.format(format, "Parameter name", p.getName());
-            System.out.format(format, "Modifiers", p.getModifiers());
-            System.out.format(format, "Is implicit?", p.isImplicit());
-            System.out.format(format, "Is name present?", p.isNamePresent());
-            System.out.format(format, "Is synthetic?", p.isSynthetic());
+            detailsStr.append("\n" + i + ". Parameter type: " + p.getType() +
+                "\n\tParameter name: " + p.getName() +
+                "\n\tModifiers: " + p.getModifiers() +
+                "\n\tIs implicit? " + p.isImplicit() +
+                "\n\tIs name present? " + p.isNamePresent() +
+                "\n\tIs synthetic? " + p.isSynthetic());
+            i++;
         }
-    }*/
+        detailsStr.append("\n<<<<<<<<<<\n");
+        
+        return detailsStr.toString();
+    }
 }

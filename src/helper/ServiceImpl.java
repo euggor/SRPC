@@ -9,9 +9,13 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import contract.Service;
 import server.ReflectHandler;
 import exception.SRPCMalformedServiceException;
+import exception.SRPCServiceException;
 import exception.SRPCServiceMerhodThrowsException;
 import exception.SRPCServiceMethodWrongParameterException;
 
@@ -20,6 +24,7 @@ import exception.SRPCServiceMethodWrongParameterException;
  *
  */
 public class ServiceImpl implements Service {
+    private static Logger logger = LogManager.getLogger(ServiceImpl.class);
     private Properties properties;
     private HashMap<String, Object> services;
     
@@ -39,13 +44,13 @@ public class ServiceImpl implements Service {
         services = new HashMap<String, Object>();
         
         for (Entry<Object, Object> entry : properties.entrySet()) {
-            System.out.println("Creating service object from the class '" +
+            logger.debug("Creating service object from the class '" +
                 entry.getValue() + "'...");
             
             Object service = ReflectHandler.createObject((String) entry.getValue());
             services.put((String) entry.getKey(), service);
         }
-        System.out.println("Service objects created: " + toString());
+        logger.debug("Service objects created: " + toString());
     }
     
     /* (non-Javadoc)
@@ -64,6 +69,7 @@ public class ServiceImpl implements Service {
             Object[] parameters) {
         Method m = ReflectHandler.getMethod(properties.getProperty(serviceName),
             methodName, parameters);
+        
         return (m == null ? false : true);
     }
 
@@ -74,6 +80,7 @@ public class ServiceImpl implements Service {
     public boolean isMethodExist(String serviceName, String methodName) {
         Method m = ReflectHandler.getMethod(properties.getProperty(serviceName),
             methodName);
+        
         return (m == null ? false : true);
     }
 
@@ -85,6 +92,7 @@ public class ServiceImpl implements Service {
             Object[] parameters) {
         Method m = ReflectHandler.getMethod(properties.getProperty(serviceName),
                 methodName, parameters);
+        
         return (m.getReturnType().toString().equalsIgnoreCase("void") ? true : false);
     }
 
@@ -98,7 +106,7 @@ public class ServiceImpl implements Service {
             methodName, parameters);
         Object result = null;
         try {
-//            Class[] argTypes = new Class[] { String[].class }; // TODO
+//            Class[] argTypes = new Class[] { String[].class };
 //            result = method.invoke(getObject(serviceName), (Object) argTypes);
             result = method.invoke(getObject(serviceName), parameters);
         } catch (InvocationTargetException e) {
@@ -108,8 +116,9 @@ public class ServiceImpl implements Service {
             result = new SRPCServiceMethodWrongParameterException("Method " + serviceName +
                 "." + methodName + " throws the exception: " + e);
         } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Catch:", e);
+            result = new SRPCServiceException("Method " + serviceName +
+                "." + methodName + " call caused the exception: " + e.getMessage());
         }
         
         return result;
@@ -117,15 +126,17 @@ public class ServiceImpl implements Service {
     
     @Override
     public String toString() {
-        StringBuffer propStr = new StringBuffer("Service object map: ");
+        StringBuffer propStr = new StringBuffer("Service object map:\n\t");
         for (Entry<String, Object> entry : services.entrySet()) {
-            propStr.append(entry.getKey() + " => " + entry.getValue() + "\n");
+            propStr.append(entry.getKey() + " => " + entry.getValue() + "; ");
         }
+        
         return propStr.toString();
     }
 
     private Object getObject(String serviceName) {
-        System.out.println("Requested service object:" + services.get(serviceName));
+        logger.debug("Requested service object: " + services.get(serviceName));
+        
         return services.get(serviceName);
     }
 }

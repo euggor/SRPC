@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import contract.Service;
 
 /**
@@ -14,6 +17,8 @@ import contract.Service;
  *
  */
 public class Listener implements Runnable {
+    private static Logger logger = LogManager.getLogger(Listener.class);
+    private static final int defaultPort = 2222;
     private volatile boolean keepRunning = true;
     private Thread serverThread;
     private Thread connectionThread;
@@ -24,57 +29,62 @@ public class Listener implements Runnable {
     
     /**
      * 
+     * @param executor
+     * @param services
+     * @throws IOException 
+     */
+    public Listener(Executor executor, Service services) throws IOException {
+        this(defaultPort, executor, services);
+    }
+
+    /**
+     * 
      * @param port
      * @param executor
      * @param services
+     * @throws IOException 
      */
-    public Listener(int port, Executor executor, Service services) {
-        try {
-            socket = new ServerSocket(port);
-//            socket.setSoTimeout(100000); // milliseconds
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    public Listener(int port, Executor executor, Service services)
+            throws IOException {
+        socket = new ServerSocket(port);
+//        socket.setSoTimeout(10000); // milliseconds
         
         this.executor = executor;
         this.services = services;
         
-        serverThread = new Thread(this, "ServerRunner");
+        serverThread = new Thread(this, "Listener");
         serverThread.start();
     }
 
     /* (non-Javadoc)
      * @see java.lang.Runnable#run()
      */
+    @Override
     public void run() {
-        System.out.println("ClientHandler running");
         while(this.keepRunning) {
             Socket clientSocket = null;
             try {
-                System.out.println("Server: waiting for client on port " +
+                logger.debug("Listening the port " +
                     socket.getLocalPort() + "...");
                 clientSocket = socket.accept();
                 connectionThread = new Thread(new ClientHandler(clientSocket,
-                    executor, services),
-                    "ClientHandler");
+                    executor, services), "ClientHandler");
                 connectionThread.start();
                 num++;
             } catch (IOException e) {
-                System.out.println("Server: time out");
+                logger.info("Socket time out");
             }
         }
-        System.out.println("ClientHandler's thread exited");
+        logger.info("Thread exited");
     }
 
     public void shutdown() {
-        System.out.println("... ClientHandler done");
         this.keepRunning = false;
     }
     
     /**
      * 
-     * @return int number of served clients
+     * @return number of served clients
      */
     public int getClientNumbers() {
         return num;

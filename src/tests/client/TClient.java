@@ -3,6 +3,9 @@
  */
 package tests.client;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import client.Client;
 import exception.SRPCClientException;
 
@@ -23,7 +26,8 @@ public class TClient {
     }
 
     private static class Caller implements Runnable {
-//        private Logger logger = Logger.getLogger(Caller.class);
+        private static Logger logger = LogManager.getLogger(Caller.class);
+        private int sessionId = (int) (Math.random()*10000) + 1;
         private Client c;
     
         public Caller(Client c) {
@@ -34,12 +38,11 @@ public class TClient {
         public void run() {
             while(true) {
                 try {
-                    c.remoteCall("test", "sleep", new Object[] {new Long(1000)});
-//                    logger.info("Current Date is:" + c.remoteCall("service1", "getCurrentDate", new Object[]{}));
-                    System.out.println("Current Date is: " + c.remoteCall("test", "getCurrentDate", new Object[]{}));
+                    c.remoteCall(sessionId, "test", "sleep", new Object[] {new Long(1000)});
+//                    c.remoteCall("test", "sleep", new Object[] {new Long(1000)});
+                    logger.info("Current Date is:" + c.remoteCall("test", "getCurrentDate", new Object[]{}));
                 } catch (SRPCClientException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    logger.error("Catch:", e);
                 }
             }
         }

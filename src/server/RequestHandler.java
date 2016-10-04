@@ -5,6 +5,9 @@ package server;
 
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import contract.Request;
 import contract.Service;
 import exception.SRPCServiceException;
@@ -17,6 +20,7 @@ import exception.SRPCServiceNotFoundException;
  *
  */
 public class RequestHandler implements Runnable {
+    private static Logger logger = LogManager.getLogger(RequestHandler.class);
     private Request request;
     private Service service;
     private CountDownLatch latch;
@@ -37,7 +41,7 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("RequestHandler: " + request + " service: " + service);
+        logger.debug(request + " service: " + service);
         
         if (service.isServiceExist(request.getServiceName())) {
             if (service.isMethodExist(request.getServiceName(),
@@ -47,33 +51,27 @@ public class RequestHandler implements Runnable {
                 
                 if (service.isMethodVoid(request.getServiceName(),
                         request.getMethodName(), request.getParameters())) {
-                    System.out.println("VOID"); // TODO
+                    logger.debug("A void method revealed");
                     result = null; // explicitly set a null result for a void method
                 }
             } else { // the method not found, check other possible signatures
                 if (service.isMethodExist(request.getServiceName(),
                         request.getMethodName())) { // other signature found
-                    System.out.println("RequestHandler: wrong parameters of the service method for " + request);
+                    logger.warn("Wrong parameters of the service method for " + request);
                     result = new SRPCServiceMethodWrongParameterException("Attempt to invoke method " + request.getServiceName() +
                         "." + request.getMethodName() + " with wrong parameters");
                 } else { // other signature not found
-                    System.out.println("RequestHandler: not existing service method for " + request);
+                    logger.warn("Not existing service method for " + request);
                     result = new SRPCServiceMethodNotFoundException("Method " + request.getServiceName() +
                         "." + request.getMethodName() + " not found");
                 }
             }
         } else { // Service not found
-            System.out.println("RequestHandler: not existing service for " + request);
+            logger.warn("Not existing service for " + request);
             result = new SRPCServiceNotFoundException("Service " +
                 request.getServiceName() + " not found");
         }
-        System.out.println("RequestHandler: result: " + result);
-/*        try {
-            Thread.sleep(3000); // commented out: test code just to check sync
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } */
+        logger.debug("Result: " + result);
         
         ready = true;
         latch.countDown(); // notify invoker that the service is done
